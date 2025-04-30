@@ -1,0 +1,116 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    cni.projectcalico.org/containerID: e960c9e6d5f2790bf318a6aea634f12b057dcfcae3860babf65cde9bd822ffcd
+    cni.projectcalico.org/podIP: 10.244.47.164/32
+    cni.projectcalico.org/podIPs: 10.244.47.164/32
+    etcd.version: 3.2.13
+  labels:
+    app: etcd
+    etcd_cluster: rl-etcd
+    etcd_node: rl-etcd-f9m6j6nbgv
+  name: rl-etcd-f9m6j6nbgv
+  namespace: default
+  ownerReferences:
+  - apiVersion: etcd.database.coreos.com/v1beta2
+    controller: true
+    kind: EtcdCluster
+    name: rl-etcd
+    uid: 970e6ffd-9396-4635-a627-ebd280250dbe
+  resourceVersion: "2834321"
+  uid: 0c4795db-a250-4456-8548-c0fecdf8a011
+spec:
+  nodeName: cloudskin-k8s-worker-0.novalocal
+  automountServiceAccountToken: false
+  containers:
+  - command:
+    - /usr/local/bin/etcd
+    - --data-dir=/var/etcd/data
+    - --name=rl-etcd-f9m6j6nbgv
+    - --initial-advertise-peer-urls=http://rl-etcd.default.svc:2380
+    - --listen-peer-urls=http://0.0.0.0:2380
+    - --listen-client-urls=http://0.0.0.0:2379
+    - --advertise-client-urls=http://rl-etcd.default.svc:2379
+    - --initial-cluster=rl-etcd-f9m6j6nbgv=http://rl-etcd.default.svc:2380
+    - --initial-cluster-state=new
+    - --initial-cluster-token=c68f5171-7091-44c3-a017-842b24a5ac41
+    image: gcr.io/etcd-development/etcd:v3.2.13
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      exec:
+        command:
+        - /bin/sh
+        - -ec
+        - ETCDCTL_API=3 etcdctl endpoint status
+      failureThreshold: 3
+      initialDelaySeconds: 10
+      periodSeconds: 60
+      successThreshold: 1
+      timeoutSeconds: 10
+    name: etcd
+    ports:
+    - containerPort: 2380
+      name: server
+      protocol: TCP
+    - containerPort: 2379
+      name: client
+      protocol: TCP
+    readinessProbe:
+      exec:
+        command:
+        - /bin/sh
+        - -ec
+        - ETCDCTL_API=3 etcdctl endpoint status
+      failureThreshold: 3
+      initialDelaySeconds: 1
+      periodSeconds: 5
+      successThreshold: 1
+      timeoutSeconds: 5
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/etcd
+      name: etcd-data
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  hostname: rl-etcd-f9m6j6nbgv
+  initContainers:
+  - command:
+    - /bin/sh
+    - -c
+    - "\n\t\t\t\t\tTIMEOUT_READY=0\n\t\t\t\t\twhile ( ! nslookup rl-etcd.default.svc
+      )\n\t\t\t\t\tdo\n\t\t\t\t\t\t# If TIMEOUT_READY is 0 we should never time out
+      and exit \n\t\t\t\t\t\tTIMEOUT_READY=$(( TIMEOUT_READY-1 ))\n                        if
+      [ $TIMEOUT_READY -eq 0 ];\n\t\t\t\t        then\n\t\t\t\t            echo \"Timed
+      out waiting for DNS entry\"\n\t\t\t\t            exit 1\n\t\t\t\t        fi\n\t\t\t\t\t\tsleep
+      1\n\t\t\t\t\tdone"
+    image: busybox:1.28.0-glibc
+    imagePullPolicy: IfNotPresent
+    name: check-dns
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+  nodeName: cloudskin-k8s-worker-0.novalocal
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Never
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  subdomain: rl-etcd
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - emptyDir: {}
+    name: etcd-data

@@ -37,6 +37,7 @@ deploy-rl-etcd:
 	./manifests/rbac/create_role.sh
 	kubectl create -f manifests/etcd-operator.yaml
 	@bash -c 'sleep 15 && echo "Wait until EtcdOperator is available"'
+	kubectl create -f manifests/crd.yaml
 	kubectl create -f manifests/rl-etcd.yaml
 	@bash -c 'sleep 30 && echo "Wait until EtcdCluster is available"'
 deploy-rl-monitor:

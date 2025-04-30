@@ -66,10 +66,11 @@ func main() {
 			panic(err.Error())
 		}
 
-		etcd_endpoint, _ := clientset.CoreV1().Services(rlns).Get("rl-etcd-client-service-lb", metav1.GetOptions{})
-		etcd_endpoint_str := "http://" + etcd_endpoint.Status.LoadBalancer.Ingress[0].IP + ":" + fmt.Sprintf("%d", etcd_endpoint.Spec.Ports[0].Port)
+		//etcd_endpoint, _ := clientset.CoreV1().Services(rlns).Get("rl-etcd-client-service-lb", metav1.GetOptions{})
+		//etcd_endpoint_str := "http://" + etcd_endpoint.Status.LoadBalancer.Ingress[0].IP + ":" + fmt.Sprintf("%d", etcd_endpoint.Spec.Ports[0].Port)
 		cfg = ETCDClient.Config{
-			Endpoints:               []string{etcd_endpoint_str},
+			//Endpoints:               []string{etcd_endpoint_str},
+			Endpoints:               []string{"http://10.106.135.218:32723"},
 			Transport:               client.DefaultTransport,
 			// set timeout per request to fail fast when the target endpoint is unavailable
 			HeaderTimeoutPerRequest: time.Second,
@@ -84,7 +85,8 @@ func main() {
 
 		// creates the in-cluster config for rl-etcd-client
 		cfg = ETCDClient.Config{
-			Endpoints:               []string{"http://rl-etcd-client:2379"},
+			//Endpoints:               []string{"http://rl-etcd-client:2379"},
+			Endpoints:               []string{"http://10.106.135.218:2379"},
 			Transport:               client.DefaultTransport,
 			// set timeout per request to fail fast when the target endpoint is unavailable
 			HeaderTimeoutPerRequest: time.Second,

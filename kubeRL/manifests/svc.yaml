@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  labels:
+    app: etcd
+    etcd_cluster: rl-etcd
+  name: rl-etcd
+  namespace: default
+  ownerReferences:
+  - apiVersion: etcd.database.coreos.com/v1beta2
+    controller: true
+    kind: EtcdCluster
+    name: rl-etcd
+    uid: 970e6ffd-9396-4635-a627-ebd280250dbe
+  resourceVersion: "2834302"
+  uid: 7fc59618-a90c-4584-b11b-e356d7861cc9
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: client
+    port: 2379
+    protocol: TCP
+    targetPort: 2379
+  - name: peer
+    port: 2380
+    protocol: TCP
+    targetPort: 2380
+  selector:
+    app: etcd
+    etcd_cluster: rl-etcd
+  sessionAffinity: None
+  type: ClusterIP
